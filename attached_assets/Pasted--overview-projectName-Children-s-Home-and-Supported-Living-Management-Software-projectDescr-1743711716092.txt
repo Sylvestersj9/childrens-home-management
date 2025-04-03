@@ -1,0 +1,68 @@
+# overview
+
+**projectName**: Children's Home and Supported Living Management Software
+**projectDescription**: A comprehensive management software designed to streamline operations and enhance care quality in children's homes and supported living facilities. The software incorporates essential features to ensure efficient user management, resident care, staff operations, communication, compliance, and more.
+
+# detailedRequirements
+
+**userManagementAndAccessControl**:
+  **secureLoginAndAuthentication**: Implement robust authentication mechanisms to ensure that only authorized personnel can access the system.
+  **granularAccessPermissions**: Allow administrators to assign specific access rights to staff members based on their roles and responsibilities, ensuring data security and compliance.
+**dashboardAndNavigation**:
+  **comprehensiveDashboard**: Provide an intuitive dashboard offering quick access to key functionalities and an overview of critical information such as upcoming tasks, recent incidents, and compliance alerts.
+  **customizableWidgets**: Enable users to personalize their dashboard with widgets displaying relevant information tailored to their specific needs.
+**residentManagement**:
+  **residentProfilesWithPhotos**: Maintain detailed profiles for each young person, including personal information, medical history, educational background, and a profile picture for easy identification.
+  **placementAndSupportPlans**: Develop and document individualized placement and support plans, outlining goals, strategies, and progress notes.
+  **dailyLogsAndActivityTracking**: Record daily activities, behaviors, and incidents to monitor the well-being and development of residents.
+  **incidentAndSafeguardingReports**: Document and manage any incidents or safeguarding concerns, ensuring proper procedures are followed and records are maintained.
+**staffManagement**:
+  **staffProfilesAndTrainingRecords**: Keep comprehensive records of staff qualifications, training, and certifications to ensure compliance and facilitate professional development.
+  **taskAssignmentAndManagement**: Assign tasks to staff members with deadlines and priorities, and track their completion to ensure accountability.
+  **shiftPlanningAndRotaManagement**: Schedule staff shifts and manage rotas to ensure adequate coverage and efficient operation of the facility.
+**communicationAndEngagement**:
+  **internalMessagingSystem**: Facilitate secure communication between staff members within the platform to enhance collaboration and information sharing.
+  **residentFeedbackPortal**: Provide a platform for young people to share their feedback, report concerns, and engage in their care plans, promoting transparency and involvement.
+**complianceAndReporting**:
+  **automatedReportGeneration**: Generate reports on various aspects such as incidents, resident progress, and staff performance to meet regulatory requirements and inform decision-making.
+  **auditLogs**: Maintain detailed logs of all system activities and changes to ensure accountability and facilitate audits.
+  **regulatoryComplianceTracking**: Monitor compliance with relevant regulations and standards, providing alerts and guidance to address any issues promptly.
+**schedulingAndCalendar**:
+  **integratedCalendar**: Manage appointments, activities, and important dates related to both residents and staff, ensuring efficient scheduling and avoiding conflicts.
+  **remindersAndNotifications**: Send automated reminders for upcoming tasks, training sessions, or medical appointments to relevant individuals.
+**documentManagement**:
+  **centralizedDocumentRepository**: Store and manage all relevant documents, including policies, procedures, resident records, and staff files, in a secure and organized manner.
+  **templateLibrary**: Provide templates for common forms and reports to standardize documentation and save time.
+**healthAndSafety**:
+  **riskAssessments**: Conduct and document risk assessments for residents and the facility, implementing measures to mitigate identified risks.
+  **healthRecordsManagement**: Maintain up-to-date health records for each resident, including medical appointments, medications, and treatment plans.
+**mobileAccessibility**:
+  **responsiveDesign**: Ensure the platform is accessible on various devices, including smartphones and tablets, allowing staff to update and access information on the go.
+  **dedicatedMobileApp**: Develop a mobile application to provide a more streamlined and user-friendly experience for mobile users.
+
+# suggestedTechStack
+
+**frontend**: React
+**backend**: Node.js
+**database**: PostgreSQL
+**authentication**: OAuth 2.0
+**storage**: AWS S3 for document storage
+**notifications**: Firebase Cloud Messaging for push notifications
+**mobile**: React Native
+
+# changeManagementInstructions
+
+**changelogInstructions**:
+  **createChangelog**: Create a file named CHANGELOG.md in the project root directory.
+  **changelogTemplate**: ## [Unreleased]
+### Added
+- 
+### Changed
+- 
+### Fixed
+- 
+### Removed
+- 
+  **sourceFileReminder**: IMPORTANT: Before modifying this file, please update CHANGELOG.md with a summary of your changes. Also, make clear comments about every change in this file and what it was replacing so that we don't end up trying the same fixes repeatedly.
+  **changeDocumentation**: All changes must be documented in the changelog and properly dated.
+
