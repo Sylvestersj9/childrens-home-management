@@ -375,7 +375,7 @@ export default function DailyLogsPage() {
               {/* Scrollable logs container */}
               <div 
                 ref={logsContainerRef} 
-                className="h-[calc(100vh-440px)] overflow-y-auto pr-2"
+                className="h-[500px] overflow-y-auto pr-2"
               >
                 {isLoading ? (
                   <div className="text-center py-12">

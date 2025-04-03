@@ -12,6 +12,8 @@ import DailyLogsPage from "@/pages/daily-logs-page";
 import IncidentsPage from "@/pages/incidents-page";
 import CalendarPage from "@/pages/calendar-page";
 import DocumentsPage from "@/pages/documents-page";
+import ReportsPage from "@/pages/reports-page";
+import SettingsPage from "@/pages/settings-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -25,6 +27,8 @@ function Router() {
       <ProtectedRoute path="/incidents" component={IncidentsPage} />
       <ProtectedRoute path="/calendar" component={CalendarPage} />
       <ProtectedRoute path="/documents" component={DocumentsPage} />
+      <ProtectedRoute path="/reports" component={ReportsPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
