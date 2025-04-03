@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -8,11 +8,13 @@ import {
   Filter, 
   X, 
   Clock,
-  CalendarX 
+  CalendarX,
+  Users
 } from "lucide-react";
 import { format } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import ResidentSidebar, { ResidentProfile } from "@/components/residents/resident-sidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +56,9 @@ export default function DailyLogsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("all");
   
+  // Resident filtering
+  const [selectedResidentId, setSelectedResidentId] = useState<number | null>(null);
+  
   // Chat-style input form state
   const [selectedResident, setSelectedResident] = useState<string>("1");
   const [selectedCategory, setSelectedCategory] = useState<string>("general");
@@ -61,6 +66,9 @@ export default function DailyLogsPage() {
   const [isImportant, setIsImportant] = useState<boolean>(false);
   const [logContent, setLogContent] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  // Ref for scroll container
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
   // Sample daily logs data - in a real app this would come from API
   const { data: dailyLogs = [], isLoading } = useQuery<DailyLog[]>({
@@ -193,6 +201,13 @@ export default function DailyLogsPage() {
   };
 
   const filteredLogs = getFilteredLogs();
+  
+  // Scroll to bottom when new logs are added or when a resident is selected
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+  }, [dailyLogs, selectedResidentId]);
 
   const getInitials = (name: string) => {
     return name
@@ -287,103 +302,136 @@ export default function DailyLogsPage() {
             </div>
           </div>
 
-          <div className="mb-6 bg-white p-4 rounded-lg shadow space-y-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <Input
-                  placeholder="Search logs..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <button 
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    onClick={() => setSearchTerm("")}
-                  >
-                    <X size={18} />
-                  </button>
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Young People Sidebar */}
+            <div className="w-full md:w-1/4 lg:w-1/5">
+              <ResidentSidebar
+                residents={[
+                  { id: 1, name: "Alex Matthews", status: "present", age: 14, room: "A1" },
+                  { id: 2, name: "Jamie Parker", status: "school", age: 15, room: "A2" },
+                  { id: 3, name: "Taylor Smith", status: "appointment", age: 16, room: "B1" },
+                  { id: 4, name: "Riley Cooper", status: "present", age: 13, room: "B2" }
+                ]}
+                selectedResidentId={selectedResidentId}
+                onSelectResident={(id) => {
+                  setSelectedResidentId(selectedResidentId === id ? null : id);
+                  // Also update the form's selected resident for quick entry
+                  if (selectedResidentId !== id) {
+                    setSelectedResident(id.toString());
+                  }
+                }}
+              />
+            </div>
+
+            {/* Main Content Area */}
+            <div className="w-full md:w-3/4 lg:w-4/5">
+              <div className="mb-6 bg-white p-4 rounded-lg shadow space-y-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative flex-grow">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Input
+                      placeholder="Search logs..."
+                      className="pl-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <button 
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        onClick={() => setSearchTerm("")}
+                      >
+                        <X size={18} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="w-full md:w-56 flex items-center gap-2">
+                    <Filter size={18} className="text-gray-400" />
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Filter by category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="health">Health</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="behavior">Behavior</SelectItem>
+                        <SelectItem value="activity">Activity</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid grid-cols-4 md:w-[400px]">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="today">Today</TabsTrigger>
+                    <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
+                    <TabsTrigger value="week">This Week</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {/* Scrollable logs container */}
+              <div 
+                ref={logsContainerRef} 
+                className="h-[calc(100vh-440px)] overflow-y-auto pr-2"
+              >
+                {isLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-primary rounded-full mx-auto"></div>
+                    <p className="mt-4 text-gray-500">Loading daily logs...</p>
+                  </div>
+                ) : filteredLogs.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-lg shadow">
+                    <div className="rounded-full bg-gray-100 p-4 w-16 h-16 flex items-center justify-center mx-auto">
+                      <Clock className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-medium text-gray-900">No daily logs found</h3>
+                    <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredLogs
+                      .filter(log => selectedResidentId === null || log.residentId === selectedResidentId)
+                      .map(log => (
+                      <Card 
+                        key={log.id} 
+                        className={`overflow-hidden ${log.important ? 'border-l-4 border-yellow-500' : ''}`}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center">
+                              <Avatar className="h-10 w-10 rounded-full mr-3">
+                                <AvatarImage src={log.residentPhoto} alt={log.residentName} />
+                                <AvatarFallback className="bg-primary text-white">
+                                  {getInitials(log.residentName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <CardTitle className="text-lg">{log.residentName}</CardTitle>
+                                <CardDescription className="flex items-center mt-1">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {formatTimestamp(log.timestamp)}
+                                </CardDescription>
+                              </div>
+                            </div>
+                            {getCategoryBadge(log.category)}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pb-3">
+                          <p className="text-gray-700">{log.content}</p>
+                        </CardContent>
+                        <CardFooter className="bg-gray-50 text-sm text-gray-500 py-2">
+                          Logged by: {log.staffName}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
                 )}
               </div>
-              <div className="w-full md:w-56 flex items-center gap-2">
-                <Filter size={18} className="text-gray-400" />
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filter by category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="health">Health</SelectItem>
-                    <SelectItem value="education">Education</SelectItem>
-                    <SelectItem value="behavior">Behavior</SelectItem>
-                    <SelectItem value="activity">Activity</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
-
-            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 md:w-[400px]">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="today">Today</TabsTrigger>
-                <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
-                <TabsTrigger value="week">This Week</TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
-
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-primary rounded-full mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading daily logs...</p>
-            </div>
-          ) : filteredLogs.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <div className="rounded-full bg-gray-100 p-4 w-16 h-16 flex items-center justify-center mx-auto">
-                <Clock className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No daily logs found</h3>
-              <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredLogs.map(log => (
-                <Card 
-                  key={log.id} 
-                  className={`overflow-hidden ${log.important ? 'border-l-4 border-yellow-500' : ''}`}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center">
-                        <Avatar className="h-10 w-10 rounded-full mr-3">
-                          <AvatarImage src={log.residentPhoto} alt={log.residentName} />
-                          <AvatarFallback className="bg-primary text-white">
-                            {getInitials(log.residentName)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">{log.residentName}</CardTitle>
-                          <CardDescription className="flex items-center mt-1">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {formatTimestamp(log.timestamp)}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      {getCategoryBadge(log.category)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-3">
-                    <p className="text-gray-700">{log.content}</p>
-                  </CardContent>
-                  <CardFooter className="bg-gray-50 text-sm text-gray-500 py-2">
-                    Logged by: {log.staffName}
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
           
           {/* Always-visible chat-style input */}
           <div className="sticky bottom-4 mt-8 w-full bg-white shadow-lg rounded-lg border overflow-hidden">
