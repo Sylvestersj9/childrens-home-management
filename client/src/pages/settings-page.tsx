@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Card, 
   CardContent, 
@@ -24,6 +25,14 @@ import { User, Bell, Shield, Database, Globe, HardDrive } from "lucide-react";
 
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({
+    name: "Admin User",
+    email: "admin@carehome.org",
+    phone: "+44 123 456 7890"
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
   
   return (
     <div className="flex h-screen overflow-hidden">
@@ -91,8 +100,10 @@ export default function SettingsPage() {
                         </Label>
                         <Input
                           id="displayName"
-                          value="Admin User"
+                          value={profileFormData.name}
+                          onChange={(e) => setProfileFormData({...profileFormData, name: e.target.value})}
                           className="col-span-3"
+                          readOnly={!isEditing}
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
@@ -102,8 +113,23 @@ export default function SettingsPage() {
                         <Input
                           id="email"
                           type="email"
-                          value="admin@carehome.org"
+                          value={profileFormData.email}
+                          onChange={(e) => setProfileFormData({...profileFormData, email: e.target.value})}
                           className="col-span-3"
+                          readOnly={!isEditing}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="phone" className="text-right">
+                          Phone
+                        </Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={profileFormData.phone}
+                          onChange={(e) => setProfileFormData({...profileFormData, phone: e.target.value})}
+                          className="col-span-3"
+                          readOnly={!isEditing}
                         />
                       </div>
                     </div>
@@ -152,7 +178,17 @@ export default function SettingsPage() {
                           Password
                         </Label>
                         <div className="col-span-3">
-                          <Button variant="outline">Change Password</Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              toast({
+                                title: "Password Change",
+                                description: "Password change functionality will be implemented in the next update.",
+                              });
+                            }}
+                          >
+                            Change Password
+                          </Button>
                         </div>
                       </div>
                       
@@ -169,8 +205,57 @@ export default function SettingsPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end space-x-2 bg-gray-50">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Save Changes</Button>
+                  {isEditing ? (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setIsEditing(false);
+                          // Reset form data to original values
+                          setProfileFormData({
+                            name: "Admin User",
+                            email: "admin@carehome.org",
+                            phone: "+44 123 456 7890"
+                          });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          setIsSaving(true);
+                          // Simulate saving profile changes
+                          setTimeout(() => {
+                            setIsSaving(false);
+                            setIsEditing(false);
+                            toast({
+                              title: "Profile Updated",
+                              description: "Your profile has been updated successfully."
+                            });
+                          }, 1000);
+                        }}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <div className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Saving...
+                          </div>
+                        ) : (
+                          "Save Changes"
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             </div>

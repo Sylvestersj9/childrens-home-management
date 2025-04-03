@@ -1,6 +1,8 @@
 import { FC, useState } from "react";
 import { Bell, Menu, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -17,6 +19,8 @@ interface HeaderProps {
 const Header: FC<HeaderProps> = ({ title, toggleSidebar }) => {
   const { user, logoutMutation } = useAuth();
   const [notificationCount, setNotificationCount] = useState(3);
+  const [_, navigate] = useLocation();
+  const { toast } = useToast();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -39,7 +43,17 @@ const Header: FC<HeaderProps> = ({ title, toggleSidebar }) => {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button className="text-gray-500 hover:text-gray-700 relative">
+        <button 
+          className="text-gray-500 hover:text-gray-700 relative"
+          onClick={() => {
+            toast({
+              title: "Notifications",
+              description: `You have ${notificationCount} unread notifications.`,
+            });
+            // Reset notification count
+            setNotificationCount(0);
+          }}
+        >
           <Bell className="h-6 w-6" />
           {notificationCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
@@ -60,8 +74,18 @@ const Header: FC<HeaderProps> = ({ title, toggleSidebar }) => {
               <ChevronDown className="h-5 w-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => {
+                navigate("/settings");
+                toast({
+                  title: "Profile",
+                  description: "Viewing your profile settings.",
+                });
+              }}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate("/settings")}>
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

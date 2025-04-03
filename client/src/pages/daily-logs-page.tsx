@@ -375,7 +375,7 @@ export default function DailyLogsPage() {
               {/* Scrollable logs container */}
               <div 
                 ref={logsContainerRef} 
-                className="h-[500px] overflow-y-auto pr-2"
+                className="h-[calc(100vh-280px)] overflow-y-auto pr-2 mb-4"
               >
                 {isLoading ? (
                   <div className="text-center py-12">
@@ -434,7 +434,7 @@ export default function DailyLogsPage() {
           </div>
           
           {/* Always-visible chat-style input */}
-          <div className="sticky bottom-4 mt-8 w-full bg-white shadow-lg rounded-lg border overflow-hidden">
+          <div className="sticky bottom-4 mt-4 w-full bg-white shadow-lg rounded-lg border overflow-hidden z-10">
             <div className="p-4">
               <div className="flex flex-col space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
