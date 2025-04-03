@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { 
   Plus, 
   Search, 
@@ -11,9 +13,10 @@ import {
 import { format } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
-import { DailyLogFormModal } from "@/components/daily-logs/daily-log-form-modal";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -50,7 +53,14 @@ export default function DailyLogsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("all");
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  
+  // Chat-style input form state
+  const [selectedResident, setSelectedResident] = useState<string>("1");
+  const [selectedCategory, setSelectedCategory] = useState<string>("general");
+  const [staffName, setStaffName] = useState<string>("Sarah Johnson");
+  const [isImportant, setIsImportant] = useState<boolean>(false);
+  const [logContent, setLogContent] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Sample daily logs data - in a real app this would come from API
   const { data: dailyLogs = [], isLoading } = useQuery<DailyLog[]>({
@@ -196,16 +206,75 @@ export default function DailyLogsPage() {
     const date = new Date(timestamp);
     return format(date, "MMM d, yyyy 'at' h:mm a");
   };
+  
+  // Function to get resident name from ID
+  const getResidentName = (id: string) => {
+    const residents = [
+      { id: "1", name: "Alex Matthews" },
+      { id: "2", name: "Jamie Parker" },
+      { id: "3", name: "Taylor Smith" },
+      { id: "4", name: "Riley Cooper" }
+    ];
+    return residents.find(resident => resident.id === id)?.name || "";
+  };
+  
+  // Daily log submission mutation
+  const { toast } = useToast();
+  
+  const createLogMutation = useMutation({
+    mutationFn: async (log: Omit<DailyLog, "id" | "timestamp">) => {
+      // In a real app, this would be an API call
+      // For now, simulate a success response after a short delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { id: Date.now().toString(), ...log, timestamp: new Date().toISOString() };
+    },
+    onSuccess: () => {
+      // Reset form
+      setLogContent("");
+      setIsImportant(false);
+      
+      // Show success toast
+      toast({
+        title: "Log added successfully",
+        description: "Your daily log has been recorded.",
+        variant: "default",
+      });
+      
+      // Refetch data
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-logs"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error adding log",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const handleSubmitLog = () => {
+    if (!logContent.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter a log entry.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createLogMutation.mutate({
+      residentId: parseInt(selectedResident),
+      residentName: getResidentName(selectedResident),
+      staffName,
+      category: selectedCategory as any,
+      content: logContent,
+      important: isImportant
+    });
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      {/* Daily Log Form Modal */}
-      <DailyLogFormModal 
-        isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
-      />
       
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Daily Logs" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
@@ -216,13 +285,6 @@ export default function DailyLogsPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Daily Logs</h1>
               <p className="text-gray-600">Record and track daily activities and observations</p>
             </div>
-            <Button 
-              className="mt-4 md:mt-0"
-              onClick={() => setIsFormModalOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Daily Log
-            </Button>
           </div>
 
           <div className="mb-6 bg-white p-4 rounded-lg shadow space-y-4">
@@ -322,6 +384,95 @@ export default function DailyLogsPage() {
               ))}
             </div>
           )}
+          
+          {/* Always-visible chat-style input */}
+          <div className="sticky bottom-4 mt-8 w-full bg-white shadow-lg rounded-lg border overflow-hidden">
+            <div className="p-4">
+              <div className="flex flex-col space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Select 
+                    value={selectedResident} 
+                    onValueChange={setSelectedResident}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select resident" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Alex Matthews</SelectItem>
+                      <SelectItem value="2">Jamie Parker</SelectItem>
+                      <SelectItem value="3">Taylor Smith</SelectItem>
+                      <SelectItem value="4">Riley Cooper</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select 
+                    value={selectedCategory} 
+                    onValueChange={setSelectedCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="health">Health</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="behavior">Behavior</SelectItem>
+                      <SelectItem value="activity">Activity</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex">
+                  <Input 
+                    className="flex-1 mr-2" 
+                    placeholder="Enter staff name" 
+                    value={staffName}
+                    onChange={(e) => setStaffName(e.target.value)}
+                  />
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="important" 
+                      checked={isImportant}
+                      onCheckedChange={(checked) => setIsImportant(checked === true)}
+                    />
+                    <label
+                      htmlFor="important"
+                      className="text-sm font-medium text-gray-700 cursor-pointer"
+                    >
+                      Important
+                    </label>
+                  </div>
+                </div>
+                
+                <Textarea 
+                  placeholder="Type your daily log entry..." 
+                  className="min-h-[100px]"
+                  value={logContent}
+                  onChange={(e) => setLogContent(e.target.value)}
+                />
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleSubmitLog}
+                    disabled={createLogMutation.isPending || !logContent.trim()}
+                  >
+                    {createLogMutation.isPending ? (
+                      <div className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                      </div>
+                    ) : (
+                      "Submit Log"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </main>
       </div>
     </div>
