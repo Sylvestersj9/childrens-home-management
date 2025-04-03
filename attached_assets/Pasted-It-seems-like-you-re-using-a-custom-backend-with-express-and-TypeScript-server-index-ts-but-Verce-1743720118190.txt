@@ -1,0 +1,154 @@
+It seems like you're using a custom backend with express and TypeScript (server/index.ts), but Vercel is not displaying the live preview as expected. The issue might be related to how you're deploying a Node.js application on Vercel, as Vercel is primarily optimized for serverless functions and static sites by default.
+
+To deploy your Node.js Express app on Vercel correctly, you need to adapt the deployment to work with serverless functions. Here's a guide to resolve this:
+
+Steps to Deploy an Express App on Vercel
+Ensure the Project Structure Is Correct for Vercel Vercel works best with a project structure where each route corresponds to a serverless function. You need to modify your project so that it’s compatible with Vercel’s serverless functions model. Here's how to structure your app:
+
+pgsql
+Copy
+Edit
+├── api/
+│   ├── index.ts  (your entry point)
+├── public/
+│   └── (static files)
+├── package.json
+└── vercel.json
+Create the API Folder In Vercel, each file inside the api/ folder will be treated as a serverless function. You'll need to move your existing Express app logic into a file in this folder.
+
+Create api/index.ts and use the following code to adapt your existing Express app:
+
+typescript
+Copy
+Edit
+import express from 'express';
+import { createServer } from 'http';
+import session from 'express-session';
+import createMemoryStore from 'memorystore';
+
+var MemoryStore = createMemoryStore(session);
+
+const app = express();
+const server = createServer(app);
+const MemStorage = class {
+  users;
+  residents;
+  staffMembers;
+  dailyLogs;
+  incidents;
+  eventsMap;
+  documents;
+  currentUserId;
+  currentResidentId;
+  currentStaffId;
+  sessionStore;
+  constructor() {
+    this.users = new Map();
+    this.residents = new Map();
+    this.staffMembers = new Map();
+    this.dailyLogs = new Map();
+    this.incidents = new Map();
+    this.eventsMap = new Map();
+    this.documents = new Map();
+    this.currentUserId = 1;
+    this.currentResidentId = 1;
+    this.currentStaffId = 1;
+    this.sessionStore = new MemoryStore({ checkPeriod: 864e5 });
+  }
+
+  async getUser(id) {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username) {
+    return Array.from(this.users.values()).find(
+      (user) => user.username.toLowerCase() === username.toLowerCase()
+    );
+  }
+
+  async createUser(insertUser) {
+    const id = this.currentUserId++;
+    const user = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+};
+
+app.use(session({
+  secret: 'your-session-secret',
+  resave: false,
+  saveUninitialized: true,
+  store: new MemoryStore({ checkPeriod: 864e5 }),
+}));
+
+app.get('/', (req, res) => {
+  res.send('Hello, Express on Vercel!');
+});
+
+export default app;
+This file will serve as the entry point for your app.
+
+Add vercel.json Configuration In your root directory, create a vercel.json file to configure how Vercel should handle your project.
+
+json
+Copy
+Edit
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"
+    }
+  ]
+}
+This file tells Vercel to use @vercel/node for your api/index.ts file and route all requests to that function.
+
+Update Your package.json Dependencies Ensure your package.json has the necessary dependencies for Vercel to build and run your app:
+
+json
+Copy
+Edit
+{
+  "name": "childrens-home-management",
+  "version": "1.0.0",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev": "ts-node server/index.ts",
+    "build": "tsc",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "memorystore": "^1.6.0",
+    "http": "0.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.5",
+    "@types/express": "^4.17.13",
+    "@types/express-session": "^1.17.5",
+    "@vercel/node": "^2.0.0"
+  }
+}
+This ensures that Vercel has all the dependencies to build your app.
+
+Deploy to Vercel Once you've made the necessary changes:
+
+Push the changes to GitHub if you haven't already.
+
+Go to your Vercel Dashboard and redeploy your project.
+
+You should now see the live preview of your Express app!
+
+Final Check:
+Logs: If your deployment still doesn’t work, check Vercel's deployment logs for detailed errors.
+
+Static Files: If your app uses static files (like images or styles), ensure those files are placed in the public/ directory. Vercel will automatically serve files from there.
+

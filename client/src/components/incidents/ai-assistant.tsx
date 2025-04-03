@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Sparkles, Send, Loader2 } from "lucide-react";
+import { Sparkles, Send, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Card,
   CardContent,
@@ -16,32 +18,52 @@ interface AiAssistantProps {
   onSuggestionSelect: (suggestion: string) => void;
 }
 
-// This is a demonstration component showing how we'd integrate with OpenAI
-// In a real implementation, this would make actual API calls to OpenAI
+interface SuggestionsResponse {
+  suggestions: string[];
+  aiAvailable: boolean;
+}
+
+interface PromptResponse {
+  response: string;
+  aiAvailable: boolean;
+}
+
 export function AiAssistant({ incidentDetails, onSuggestionSelect }: AiAssistantProps) {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+  const { toast } = useToast();
 
   // Function to generate suggestions based on incident details
   const generateSuggestions = async () => {
+    if (incidentDetails.length < 20) return;
+    
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await apiRequest("POST", "/api/ai/suggestions", {
+        incidentDescription: incidentDetails
+      });
       
-      // These would normally come from the OpenAI API
-      const mockSuggestions = [
-        "The incident appears to involve a breach of safety protocols. Consider reviewing relevant safety procedures with all staff members.",
-        "Based on the description, this may require follow-up with the resident's guardian or social worker within 24 hours.",
-        "Similar incidents have occurred in the past. Consider implementing a preventive measure such as increased supervision during transition periods.",
-        "This incident may need to be reported to regulatory authorities under Section 42 of the Care Act."
-      ];
+      const data: SuggestionsResponse = await response.json();
       
-      setSuggestions(mockSuggestions);
+      setSuggestions(data.suggestions);
+      setAiAvailable(data.aiAvailable);
+      
+      if (!data.aiAvailable) {
+        toast({
+          title: "AI Assistant Limited",
+          description: "OpenAI integration is not available. Using fallback suggestions.",
+        });
+      }
     } catch (error) {
       console.error("Error generating suggestions:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate suggestions. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -54,16 +76,29 @@ export function AiAssistant({ incidentDetails, onSuggestionSelect }: AiAssistant
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await apiRequest("POST", "/api/ai/prompt", {
+        prompt: prompt
+      });
       
-      // This would normally be generated based on the prompt via OpenAI API
-      const generatedResponse = `Based on your query "${prompt}", I recommend documenting the following: 1) Exact time and location of the incident, 2) All staff and residents present, 3) Any immediate actions taken to address the situation, 4) Whether any medical attention was required.`;
+      const data: PromptResponse = await response.json();
       
-      setSuggestions(prev => [generatedResponse, ...prev]);
+      setSuggestions(prev => [data.response, ...prev]);
+      setAiAvailable(data.aiAvailable);
       setPrompt("");
+      
+      if (!data.aiAvailable) {
+        toast({
+          title: "AI Assistant Limited",
+          description: "OpenAI integration is not available. Using fallback responses.",
+        });
+      }
     } catch (error) {
       console.error("Error processing prompt:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process your question. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +110,12 @@ export function AiAssistant({ incidentDetails, onSuggestionSelect }: AiAssistant
         <CardTitle className="text-lg flex items-center">
           <Sparkles className="h-5 w-5 mr-2 text-primary" />
           AI Incident Report Assistant
+          {aiAvailable === false && (
+            <span className="ml-2 text-amber-500 flex items-center text-xs">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Limited Mode
+            </span>
+          )}
         </CardTitle>
         <CardDescription>
           Get AI-powered suggestions to help complete your incident report
@@ -101,7 +142,7 @@ export function AiAssistant({ incidentDetails, onSuggestionSelect }: AiAssistant
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[240px] overflow-y-auto">
               {suggestions.map((suggestion, index) => (
                 <div key={index} className="bg-card p-3 rounded-md border">
                   <p className="text-sm mb-2">{suggestion}</p>
