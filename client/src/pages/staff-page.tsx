@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { StaffFormModal } from "@/components/staff/staff-form-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +47,7 @@ export default function StaffPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   // Sample staff data - in a real app this would come from API
   const { data: staffMembers = [], isLoading } = useQuery<StaffMember[]>({
@@ -166,6 +168,12 @@ export default function StaffPage() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
+      {/* Staff Form Modal */}
+      <StaffFormModal 
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+      />
+      
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Staff" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -175,7 +183,10 @@ export default function StaffPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Staff</h1>
               <p className="text-gray-600">Manage staff members and their schedules</p>
             </div>
-            <Button className="mt-4 md:mt-0">
+            <Button 
+              className="mt-4 md:mt-0"
+              onClick={() => setIsFormModalOpen(true)}
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Add New Staff
             </Button>

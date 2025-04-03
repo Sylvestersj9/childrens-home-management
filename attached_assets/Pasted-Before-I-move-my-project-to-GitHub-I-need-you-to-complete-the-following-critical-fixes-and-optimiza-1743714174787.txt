@@ -1,0 +1,177 @@
+Before I move my project to GitHub, I need you to complete the following critical fixes and optimizations:
+
+1. Fix All Non-Functional Buttons and Pages
+✅ Resident Management:
+
+Fix the "Add New Resident" button so that it opens a form modal.
+
+The form should include:
+
+Full Name
+
+Date of Birth
+
+Profile Picture Upload
+
+Medical History
+
+Educational Background
+
+Placement and Support Plans
+
+Guardian Details
+
+Any additional notes
+
+After submission, the new resident should be saved in the database and appear in the Resident List.
+
+The resident should now appear in the sidebar list.
+
+✅ Staff Management:
+
+Fix the "Add New Staff" button to open a similar form, asking for:
+
+Full Name
+
+Date of Birth
+
+Profile Picture Upload
+
+Role & Responsibilities
+
+Contact Information
+
+Qualifications & Certifications
+
+Work Schedule
+
+Notes
+
+Ensure staff data is stored properly in the database.
+
+✅ Daily Logs Page (Chatbox-Style Update)
+
+On the left side, show a list of all young persons (YPs) with profile pictures.
+
+When a YP is selected, a chat-style interface should open where I can type and submit daily logs.
+
+Each log entry should be stored under that YP's profile and should be retrievable when needed.
+
+Ensure the "Daily Log" button actually opens this page.
+
+✅ Incident Management (Fix the Incident Menu)
+
+Ensure the Incident button opens a new form.
+
+The form should contain:
+
+Date & Time of Incident
+
+YP's Name (auto-selected based on selection)
+
+Description of Incident
+
+Actions Taken
+
+Staff Involved
+
+The incident should be registered under the YP’s profile and appear on the dashboard as a summary.
+
+✅ Calendar (Fix Event Creation & Reminders)
+
+Ensure the "Add New Event" button works.
+
+Allow events to have:
+
+Title
+
+Description
+
+Start & End Date/Time
+
+Assigned Participants (Staff/YPs)
+
+Notification Type (Dashboard & Email Reminder)
+
+Implement email notifications for upcoming events using Nodemailer.
+
+✅ Documents Management
+
+Fix the "Upload New Document" button so it allows document uploads.
+
+Store documents securely in AWS S3 or local storage.
+
+Allow users to view, rename, and delete uploaded documents.
+
+✅ Reports & Settings (Fix 404 Errors)
+
+Fix the Reports menu so it properly generates logs, incidents, and analytics reports.
+
+Fix the Settings menu and include:
+
+Profile Management
+
+Role-Based Access Control
+
+System Preferences
+
+Shift Plan Management
+
+Compliance & Regulatory Settings
+
+Automated Reporting Frequency
+
+API Key Management
+
+2. AI & Automation Enhancements
+✅ Integrate AI Assistance Across the Application:
+
+Use OpenAI API to generate summaries for logs and incidents.
+
+AI should suggest risk assessments based on previous incident data.
+
+AI should automate report generation (monthly logs, staff activities, etc.).
+
+AI should provide autocomplete suggestions for daily logs.
+
+✅ Automate Task Management:
+
+When an incident occurs, it should auto-generate a task for follow-up (e.g., notify social worker).
+
+When a new resident is added, the system should auto-create a placement plan template.
+
+3. Performance & UI Enhancements
+✅ Optimize Code & Database Queries:
+
+Remove unnecessary console logs, redundant API calls.
+
+Implement caching where necessary.
+
+Optimize database queries for speed.
+
+✅ Improve UI/UX for Better Aesthetics & Responsiveness:
+
+Ensure smooth transitions and animations.
+
+Improve form layouts for better readability.
+
+Make mobile responsiveness seamless.
+
+4. Final Testing & Debugging
+✅ Test Every Single Button & Feature:
+
+Click every button and ensure it performs the intended function.
+
+Fix any unresponsive pages or UI elements.
+
+Ensure error messages are clear when something goes wrong.
+
+✅ Final Check Before Migration:
+
+Ensure all fixes are implemented before I move my project to GitHub.
+
+Clean up any leftover placeholder code or unfinished components.
+
+🔴 After completion, provide a summary of what was fixed & improved.
+
+✅ Make sure everything is working properly before I migrate to GitHub

@@ -13,6 +13,7 @@ import {
 import { format } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { IncidentFormModal } from "@/components/incidents/incident-form-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,6 +52,7 @@ export default function IncidentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   // Sample incidents data - in a real app this would come from API
   const { data: incidents = [], isLoading } = useQuery<Incident[]>({
@@ -233,6 +235,12 @@ export default function IncidentsPage() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
+      {/* Incident Form Modal */}
+      <IncidentFormModal 
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+      />
+      
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Incidents" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -242,7 +250,10 @@ export default function IncidentsPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Incidents</h1>
               <p className="text-gray-600">Report and manage incidents and safeguarding concerns</p>
             </div>
-            <Button className="mt-4 md:mt-0">
+            <Button 
+              className="mt-4 md:mt-0"
+              onClick={() => setIsFormModalOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Report New Incident
             </Button>

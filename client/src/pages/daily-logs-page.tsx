@@ -11,6 +11,7 @@ import {
 import { format } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { DailyLogFormModal } from "@/components/daily-logs/daily-log-form-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +50,7 @@ export default function DailyLogsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   // Sample daily logs data - in a real app this would come from API
   const { data: dailyLogs = [], isLoading } = useQuery<DailyLog[]>({
@@ -199,6 +201,12 @@ export default function DailyLogsPage() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
+      {/* Daily Log Form Modal */}
+      <DailyLogFormModal 
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+      />
+      
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Daily Logs" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -208,7 +216,10 @@ export default function DailyLogsPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Daily Logs</h1>
               <p className="text-gray-600">Record and track daily activities and observations</p>
             </div>
-            <Button className="mt-4 md:mt-0">
+            <Button 
+              className="mt-4 md:mt-0"
+              onClick={() => setIsFormModalOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Daily Log
             </Button>

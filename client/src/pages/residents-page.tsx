@@ -4,11 +4,13 @@ import {
   UserPlus, 
   Search, 
   Filter, 
-  X
+  X,
+  Users
 } from "lucide-react";
 import { Resident } from "@/components/dashboard/residents-table";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
+import { ResidentFormModal } from "@/components/residents/resident-form-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +34,7 @@ export default function ResidentsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   // Sample residents data - in a real app this would come from API
   const { data: residents = [], isLoading } = useQuery<Resident[]>({
@@ -146,6 +149,12 @@ export default function ResidentsPage() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
+      {/* Resident Form Modal */}
+      <ResidentFormModal 
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+      />
+      
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Residents" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -155,7 +164,10 @@ export default function ResidentsPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Residents</h1>
               <p className="text-gray-600">Manage all residents and their details</p>
             </div>
-            <Button className="mt-4 md:mt-0">
+            <Button 
+              className="mt-4 md:mt-0"
+              onClick={() => setIsFormModalOpen(true)}
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Add New Resident
             </Button>
