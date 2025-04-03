@@ -11,6 +11,8 @@ import { Resident } from "@/components/dashboard/residents-table";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { ResidentFormModal } from "@/components/residents/resident-form-modal";
+import { ResidentSidebar } from "@/components/residents/resident-sidebar";
+import { ResidentDetail } from "@/components/residents/resident-detail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,6 +37,7 @@ export default function ResidentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedResident, setSelectedResident] = useState<Resident | null>(null);
 
   // Sample residents data - in a real app this would come from API
   const { data: residents = [], isLoading } = useQuery<Resident[]>({
@@ -144,6 +147,14 @@ export default function ResidentsPage() {
       .join('')
       .toUpperCase();
   };
+  
+  const handleSelectResident = (resident: Resident) => {
+    setSelectedResident(resident);
+  };
+  
+  const handleBack = () => {
+    setSelectedResident(null);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -158,101 +169,129 @@ export default function ResidentsPage() {
       <div className="flex-1 ml-0 lg:ml-64 transition-all duration-300">
         <Header title="Residents" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
-        <main className="p-4 lg:p-6 bg-gray-50 min-h-screen overflow-y-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">Residents</h1>
-              <p className="text-gray-600">Manage all residents and their details</p>
-            </div>
-            <Button 
-              className="mt-4 md:mt-0"
-              onClick={() => setIsFormModalOpen(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add New Resident
-            </Button>
-          </div>
-
-          <div className="mb-6 bg-white p-4 rounded-lg shadow flex flex-col md:flex-row gap-4">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <Input
-                placeholder="Search residents..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchTerm && (
-                <button 
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  onClick={() => setSearchTerm("")}
+        <main className="p-0 bg-gray-50 h-[calc(100vh-4rem)] overflow-hidden">
+          {!selectedResident ? (
+            // Residents List View
+            <div className="p-4 lg:p-6 h-full overflow-y-auto">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800 mb-2">Residents</h1>
+                  <p className="text-gray-600">Manage all residents and their details</p>
+                </div>
+                <Button 
+                  className="mt-4 md:mt-0"
+                  onClick={() => setIsFormModalOpen(true)}
                 >
-                  <X size={18} />
-                </button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add New Resident
+                </Button>
+              </div>
+
+              <div className="mb-6 bg-white p-4 rounded-lg shadow flex flex-col md:flex-row gap-4">
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <Input
+                    placeholder="Search residents..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
+                <div className="w-full md:w-56 flex items-center gap-2">
+                  <Filter size={18} className="text-gray-400" />
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="present">Present</SelectItem>
+                      <SelectItem value="school">School</SelectItem>
+                      <SelectItem value="appointment">Appointment</SelectItem>
+                      <SelectItem value="leave">Leave</SelectItem>
+                      <SelectItem value="absent">Absent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-primary rounded-full mx-auto"></div>
+                  <p className="mt-4 text-gray-500">Loading residents...</p>
+                </div>
+              ) : filteredResidents.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-lg shadow">
+                  <div className="rounded-full bg-gray-100 p-4 w-16 h-16 flex items-center justify-center mx-auto">
+                    <Users className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-medium text-gray-900">No residents found</h3>
+                  <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredResidents.map(resident => (
+                    <Card key={resident.id} className="overflow-hidden">
+                      <CardHeader className="bg-gray-50 pb-2">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-lg">{resident.name}</CardTitle>
+                          {getStatusBadge(resident.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="flex items-center mb-4">
+                          <Avatar className="h-14 w-14 rounded-full mr-3">
+                            <AvatarImage src={resident.photo} alt={resident.name} />
+                            <AvatarFallback className="bg-primary text-white text-lg">
+                              {getInitials(resident.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-gray-500 text-sm">Room {resident.room}</p>
+                            <p className="text-gray-500 text-sm">Age: {resident.age}</p>
+                            <p className="text-gray-500 text-sm">Key Worker: {resident.keyWorker}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="bg-gray-50 flex justify-between pt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSelectResident(resident)}
+                        >
+                          Profile
+                        </Button>
+                        <Button variant="ghost" size="sm">Daily Log</Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
-            <div className="w-full md:w-56 flex items-center gap-2">
-              <Filter size={18} className="text-gray-400" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="present">Present</SelectItem>
-                  <SelectItem value="school">School</SelectItem>
-                  <SelectItem value="appointment">Appointment</SelectItem>
-                  <SelectItem value="leave">Leave</SelectItem>
-                  <SelectItem value="absent">Absent</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-primary rounded-full mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading residents...</p>
-            </div>
-          ) : filteredResidents.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <div className="rounded-full bg-gray-100 p-4 w-16 h-16 flex items-center justify-center mx-auto">
-                <Users className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No residents found</h3>
-              <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredResidents.map(resident => (
-                <Card key={resident.id} className="overflow-hidden">
-                  <CardHeader className="bg-gray-50 pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{resident.name}</CardTitle>
-                      {getStatusBadge(resident.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <div className="flex items-center mb-4">
-                      <Avatar className="h-14 w-14 rounded-full mr-3">
-                        <AvatarImage src={resident.photo} alt={resident.name} />
-                        <AvatarFallback className="bg-primary text-white text-lg">
-                          {getInitials(resident.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-gray-500 text-sm">Room {resident.room}</p>
-                        <p className="text-gray-500 text-sm">Age: {resident.age}</p>
-                        <p className="text-gray-500 text-sm">Key Worker: {resident.keyWorker}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="bg-gray-50 flex justify-between pt-3">
-                    <Button variant="outline" size="sm">Profile</Button>
-                    <Button variant="ghost" size="sm">Daily Log</Button>
-                  </CardFooter>
-                </Card>
-              ))}
+            // Resident Detail View with sidebar layout
+            <div className="flex h-full">
+              <div className="hidden lg:block">
+                <ResidentSidebar
+                  residents={residents}
+                  selectedResidentId={selectedResident.id}
+                  onSelectResident={handleSelectResident}
+                />
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+                <ResidentDetail 
+                  resident={selectedResident} 
+                  onBack={handleBack} 
+                />
+              </div>
             </div>
           )}
         </main>

@@ -14,7 +14,7 @@ import {
 import { format } from "date-fns";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
-import ResidentSidebar, { ResidentProfile } from "@/components/residents/resident-sidebar";
+import { ResidentSidebar } from "@/components/residents/resident-sidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -307,13 +307,14 @@ export default function DailyLogsPage() {
             <div className="w-full md:w-1/4 lg:w-1/5">
               <ResidentSidebar
                 residents={[
-                  { id: 1, name: "Alex Matthews", status: "present", age: 14, room: "A1" },
-                  { id: 2, name: "Jamie Parker", status: "school", age: 15, room: "A2" },
-                  { id: 3, name: "Taylor Smith", status: "appointment", age: 16, room: "B1" },
-                  { id: 4, name: "Riley Cooper", status: "present", age: 13, room: "B2" }
+                  { id: 1, name: "Alex Matthews", status: "present", age: 14, room: "A1", keyWorker: "Sarah Johnson" },
+                  { id: 2, name: "Jamie Parker", status: "school", age: 15, room: "A2", keyWorker: "Mark Wilson" },
+                  { id: 3, name: "Taylor Smith", status: "appointment", age: 16, room: "B1", keyWorker: "Lisa Chen" },
+                  { id: 4, name: "Riley Cooper", status: "present", age: 13, room: "B2", keyWorker: "Dr. James Rodriguez" }
                 ]}
                 selectedResidentId={selectedResidentId}
-                onSelectResident={(id) => {
+                onSelectResident={(resident) => {
+                  const id = resident.id;
                   setSelectedResidentId(selectedResidentId === id ? null : id);
                   // Also update the form's selected resident for quick entry
                   if (selectedResidentId !== id) {

@@ -1,0 +1,189 @@
+Residents Menu:
+
+The Residents Menu should display everything about the YPs (young people) in the home. After clicking the "Residents" option from the sidebar, it should ask me to select a YP from a list.
+
+After selecting a YP, I want to see a comprehensive view that includes sections like:
+
+Profile: Personal details of the YP.
+
+Contacts: Emergency contacts, family, and other relevant contacts.
+
+Meetings: Scheduled or completed meetings related to the YP.
+
+Emails: Communication history, emails related to the YP.
+
+Safeguarding Issues: Any safeguarding concerns/issues.
+
+Reports: Reports related to the YP.
+
+Incidents: Incident history for the YP.
+
+Support Plans: Care or support plans for the YP.
+
+Risk Assessments: Risk assessments for the YP.
+
+Key Work Sessions: Sessions conducted with the YP.
+
+Create New Form for Each Section:
+
+On each page related to the above sections (Profile, Contacts, Meetings, Emails, etc.), I need an option to create new entries and add information about the selected YP.
+
+For example, on the Incidents page, I should be able to create a new incident report. On the Support Plans page, I should be able to add a new support plan, etc.
+
+Action Plan:
+Step 1: Create a List of YP Profiles in Residents Menu
+Residents Menu should display a list of YPs in the home. Upon selecting a YP, it should load the respective YP's data across different categories like profile, contacts, incidents, etc.
+
+UI/UX: Show a sidebar with a list of YPs and their basic profile details (name, age, and picture). Clicking on a YP should open their detailed page with the relevant sections.
+
+Implementation:
+
+javascript
+Copy
+Edit
+// On sidebar click, show list of YPs
+document.getElementById('residentsMenu').addEventListener('click', async () => {
+  const ypList = await fetchYPList(); // Fetch YP profiles from backend
+  displayYPList(ypList); // Function to display the list of YPs in the sidebar
+});
+
+// On YP click, show detailed profile
+document.getElementById('ypList').addEventListener('click', async (event) => {
+  const ypId = event.target.getAttribute('data-id'); // Get selected YP ID
+  const ypData = await fetchYPData(ypId); // Fetch YP data based on selected ID
+  displayYPDetails(ypData); // Display selected YP's detailed data
+});
+Step 2: Show Detailed Information for Each Section
+Once a YP is selected, display sections such as Profile, Contacts, Meetings, Emails, Safeguarding Issues, Reports, Incidents, Support Plans, Risk Assessments, and Key Work Sessions.
+
+Each section should have the option to add new entries by clicking on an "Add New" button.
+
+Implementation for each section (example: Profile):
+
+javascript
+Copy
+Edit
+// Fetch YP's profile details and display
+async function fetchYPData(ypId) {
+  const response = await fetch(`/api/yp/${ypId}`);
+  const ypData = await response.json();
+  return ypData;
+}
+
+function displayYPDetails(ypData) {
+  // Example for displaying Profile data
+  document.getElementById('profile').innerHTML = `
+    <h2>${ypData.name}</h2>
+    <p>Age: ${ypData.age}</p>
+    <p>Contact: ${ypData.contact}</p>
+    // More profile details
+  `;
+  
+  // Populate other sections similarly
+}
+Step 3: Implement "Add New" Forms for Each Section
+Each section (e.g., Incidents, Support Plans) should have a form to add new data. After submitting the form, the new entry should be saved to the backend and reflected on the YP's profile.
+
+For example, on the Incidents page, allow the staff member to submit a new incident report.
+
+Implementation:
+
+html
+Copy
+Edit
+<!-- Add New Incident Button -->
+<button id="addNewIncident">Add New Incident</button>
+
+<!-- New Incident Form (hidden by default) -->
+<div id="incidentForm" style="display:none;">
+  <input type="text" id="incidentDescription" placeholder="Describe the incident" />
+  <button id="submitIncident">Submit</button>
+</div>
+javascript
+Copy
+Edit
+// Show form when 'Add New' is clicked
+document.getElementById('addNewIncident').addEventListener('click', () => {
+  document.getElementById('incidentForm').style.display = 'block';
+});
+
+// Submit new incident
+document.getElementById('submitIncident').addEventListener('click', async () => {
+  const description = document.getElementById('incidentDescription').value;
+  const ypId = getSelectedYPId(); // Get the selected YP ID
+  
+  const response = await submitNewIncident(ypId, description);
+  if (response.success) {
+    // Refresh the incidents section
+    loadYPIncidents(ypId);
+  }
+});
+Step 4: Ensure Each Section is Responsive and Accessible
+Each page should be responsive, so it looks good on both desktop and mobile devices.
+
+Implement a consistent design for each section (Profile, Reports, Incidents, etc.) and ensure all buttons and forms are properly styled.
+
+Example:
+
+css
+Copy
+Edit
+/* Basic styling for form and buttons */
+#incidentForm {
+  margin: 20px;
+}
+
+button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+Step 5: Backend Integration
+Ensure all data entered through the "Add New" forms is sent to the backend and stored in the database.
+
+Create appropriate API routes in the backend for handling POST requests to add new data for each section (e.g., adding incidents, support plans, etc.).
+
+Example Backend Route (Node.js):
+
+javascript
+Copy
+Edit
+// Express route to add a new incident
+app.post('/api/yp/:ypId/incident', (req, res) => {
+  const ypId = req.params.ypId;
+  const { description } = req.body;
+
+  // Add the incident to the database for the YP
+  db.addIncident(ypId, description)
+    .then(() => res.status(200).json({ success: true }))
+    .catch(error => res.status(500).json({ error: error.message }));
+});
+Final Touches:
+Test Each Section:
+
+Ensure each section loads correctly after selecting a YP, and all buttons for adding new entries are responsive.
+
+Test the submission of forms to ensure data is saved and displayed correctly.
+
+User Feedback:
+
+Provide feedback when a form is submitted (e.g., a success message or error message).
+
+Styling:
+
+Ensure the layout is clean, and the design is user-friendly with easy navigation.
+
+Overall Goal:
+
+The Residents Menu should display a comprehensive view of each YP, and after selecting a YP, every section (profile, incidents, support plans, etc.) should be accessible.
+
+Each section should allow adding new data via a simple and intuitive form.
+
+Ensure the application is responsive, and all forms are functional.
+
