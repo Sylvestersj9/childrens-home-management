@@ -202,37 +202,6 @@ export default function DailyLogsPage() {
 
   const filteredLogs = getFilteredLogs();
   
-  // Scroll to bottom when new logs are added or when a resident is selected
-  useEffect(() => {
-    if (logsContainerRef.current) {
-      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
-    }
-  }, [dailyLogs, selectedResidentId]);
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return format(date, "MMM d, yyyy 'at' h:mm a");
-  };
-  
-  // Function to get resident name from ID
-  const getResidentName = (id: string) => {
-    const residents = [
-      { id: "1", name: "Alex Matthews" },
-      { id: "2", name: "Jamie Parker" },
-      { id: "3", name: "Taylor Smith" },
-      { id: "4", name: "Riley Cooper" }
-    ];
-    return residents.find(resident => resident.id === id)?.name || "";
-  };
-  
   // Daily log submission mutation
   const { toast } = useToast();
   
@@ -266,6 +235,48 @@ export default function DailyLogsPage() {
       });
     }
   });
+  
+  // Scroll to bottom when new logs are added, when a resident is selected, or after mutation completes
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+  }, [dailyLogs, selectedResidentId, createLogMutation.isPending]);
+  
+  // Ensure scroll happens after rendering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (logsContainerRef.current) {
+        logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+      }
+    }, 100); // Small delay to ensure content is rendered
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return format(date, "MMM d, yyyy 'at' h:mm a");
+  };
+  
+  // Function to get resident name from ID
+  const getResidentName = (id: string) => {
+    const residents = [
+      { id: "1", name: "Alex Matthews" },
+      { id: "2", name: "Jamie Parker" },
+      { id: "3", name: "Taylor Smith" },
+      { id: "4", name: "Riley Cooper" }
+    ];
+    return residents.find(resident => resident.id === id)?.name || "";
+  };
   
   const handleSubmitLog = () => {
     if (!logContent.trim()) {
@@ -376,7 +387,8 @@ export default function DailyLogsPage() {
               {/* Scrollable logs container */}
               <div 
                 ref={logsContainerRef} 
-                className="h-[calc(100vh-280px)] overflow-y-auto pr-2 mb-4"
+                className="h-[calc(100vh-380px)] overflow-y-auto pr-2 mb-4 border border-gray-200 rounded-lg"
+                style={{ scrollBehavior: 'smooth' }}
               >
                 {isLoading ? (
                   <div className="text-center py-12">

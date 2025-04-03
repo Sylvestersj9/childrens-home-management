@@ -1,10 +1,16 @@
 import { FC, useState } from 'react';
-import { Search, User, X } from 'lucide-react';
+import { Search, User, X, Home, Calendar, UserCheck, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Resident } from '@/components/dashboard/residents-table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ResidentSidebarProps {
   residents: Resident[];
@@ -84,36 +90,90 @@ export const ResidentSidebar: FC<ResidentSidebarProps> = ({
         ) : (
           <div className="px-3 py-2">
             {filteredResidents.map((resident) => (
-              <Button
-                key={resident.id}
-                variant="ghost"
-                className={`w-full justify-start px-3 py-6 mb-2 ${
-                  selectedResidentId === resident.id ? 'bg-white shadow-sm' : ''
-                }`}
-                onClick={() => onSelectResident(resident)}
-              >
-                <div className="flex items-center w-full">
-                  <div className="relative mr-3">
-                    <Avatar>
-                      <AvatarImage src={resident.photo} alt={resident.name} />
-                      <AvatarFallback className="bg-primary text-white">
-                        {getInitials(resident.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span
-                      className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusIndicator(
-                        resident.status
-                      )}`}
-                    ></span>
-                  </div>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="font-medium">{resident.name}</span>
-                    <span className="text-xs text-gray-500">
-                      Room {resident.room} • Age {resident.age}
-                    </span>
-                  </div>
-                </div>
-              </Button>
+              <TooltipProvider key={resident.id}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      key={resident.id}
+                      variant="ghost"
+                      className={`w-full justify-start px-3 py-6 mb-2 ${
+                        selectedResidentId === resident.id ? 'bg-white shadow-sm' : ''
+                      }`}
+                      onClick={() => onSelectResident(resident)}
+                    >
+                      <div className="flex items-start w-full">
+                        <div className="relative mr-3">
+                          <Avatar>
+                            <AvatarImage src={resident.photo} alt={resident.name} />
+                            <AvatarFallback className="bg-primary text-white">
+                              {getInitials(resident.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span
+                            className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusIndicator(
+                              resident.status
+                            )}`}
+                          ></span>
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                          <span className="font-medium">{resident.name}</span>
+                          <div className="grid gap-1 mt-1">
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Home className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="truncate">Room {resident.room}</span>
+                            </div>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="truncate">Age {resident.age}</span>
+                            </div>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <UserCheck className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="truncate">{resident.keyWorker}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs">
+                    <div className="text-sm">
+                      <div className="flex items-center">
+                        <p className="font-semibold text-base">{resident.name}</p>
+                        <Badge 
+                          variant="outline" 
+                          className={`ml-2 ${
+                            resident.status === 'present' ? 'bg-green-100 text-green-800' :
+                            resident.status === 'school' ? 'bg-yellow-100 text-yellow-800' :
+                            resident.status === 'appointment' ? 'bg-red-100 text-red-800' :
+                            resident.status === 'leave' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {resident.status.charAt(0).toUpperCase() + resident.status.slice(1)}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 grid gap-1">
+                        <p className="flex items-center">
+                          <Home className="h-4 w-4 mr-2 text-gray-500" />
+                          Room {resident.room}
+                        </p>
+                        <p className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                          {resident.age} years old
+                        </p>
+                        <p className="flex items-center">
+                          <UserCheck className="h-4 w-4 mr-2 text-gray-500" />
+                          Key Worker: {resident.keyWorker}
+                        </p>
+                        <p className="flex items-center mt-1 text-xs text-gray-500">
+                          <Info className="h-3 w-3 mr-1" />
+                          Click for full profile
+                        </p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ))}
           </div>
         )}
