@@ -1,0 +1,49 @@
+**"Enhance the existing full-stack web application by ensuring all UI buttons and navigation elements are fully functional. Each page in the menu and sidebar must exist and perform its intended function.
+
+Fix button functionality – Ensure all buttons (login, logout, submit, create, update, delete, etc.) trigger the appropriate API calls and display responses correctly.
+
+Create dummy login credentials – Add a seed script to create initial users in PostgreSQL:
+
+Admin: admin@example.com / Admin123!
+
+Manager: manager@example.com / Manager123!
+
+Staff: staff@example.com / Staff123!
+
+Ensure pages are fully functional – Implement proper backend routes, database logic, and frontend UI for the following sections:
+
+Dashboard: Display active residents, pending tasks, incidents, and compliance alerts.
+
+Resident Management: Allow CRUD operations (Create, Read, Update, Delete) for residents.
+
+Staff Management: Allow CRUD operations for staff profiles.
+
+Incident Reports: Implement incident logging, viewing, and updating.
+
+Task & Shift Management: Create, assign, and track tasks and shifts for staff.
+
+Compliance & Reports: Generate PDF/CSV reports on incidents, staff shifts, and resident updates.
+
+Messaging System: Enable internal messaging between staff members.
+
+Integrate AI API – Implement a backend API endpoint that connects to OpenAI’s ChatGPT-4 API to assist staff with queries regarding policies and procedures. The chatbot should:
+
+Accept user questions from the frontend.
+
+Query company policies stored in PostgreSQL.
+
+Return summarized responses using AI.
+
+Enhance user experience – Add loading indicators, form validation, and error handling to prevent crashes or unexpected behavior.
+
+Code organization & environment setup – Ensure a well-structured backend with separate files for routes, controllers, models, and middleware. Store environment variables (e.g., database connection, AI API key) in a .env file.
+
+Testing & Debugging – Test all API endpoints with Postman and ensure UI interactions work smoothly. Fix any frontend/backend issues that prevent proper data flow.
+
+Final review & deployment – Provide a README file with clear instructions on how to run and test the project locally and on Replit."**
+
+Next Steps After Running the Command
+✅ Test the login system using the dummy credentials.
+✅ Verify each page is functional (dashboard, resident management, incident reports, etc.).
+✅ Ensure AI API is correctly integrated and providing policy-based responses.
+✅ Fix any broken buttons or missing features before moving forward.

@@ -18,15 +18,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { insertUserSchema } from "@shared/schema";
 
-const loginSchema = insertUserSchema.pick({
-  username: true,
-  password: true,
+// Helper function to ensure optional fields don't cause type errors
+const safeStr = (value: string | null | undefined): string => {
+  return value || "";
+};
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const signUpSchema = insertUserSchema.extend({
+const signUpSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Valid email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
+  role: z.string().default("staff"),
+  name: z.string().optional(),
+  position: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -42,8 +53,8 @@ export default function AuthPage() {
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      username: "admin",
+      password: "admin123",
     },
   });
 
@@ -51,9 +62,12 @@ export default function AuthPage() {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: "",
       confirmPassword: "",
       role: "staff",
+      name: "",
+      position: "",
     },
   });
 
@@ -133,6 +147,12 @@ export default function AuthPage() {
                     >
                       {loginMutation.isPending ? "Signing in..." : "Sign In"}
                     </Button>
+                    
+                    <div className="text-center mt-4 text-sm text-gray-500">
+                      <p>Default credentials are pre-filled:</p>
+                      <p>Username: <span className="font-semibold">admin</span> / Password: <span className="font-semibold">admin123</span></p>
+                      <p>Or use staff / staff123</p>
+                    </div>
                   </form>
                 </Form>
               </TabsContent>
@@ -140,6 +160,38 @@ export default function AuthPage() {
               <TabsContent value="signup">
                 <Form {...signUpForm}>
                   <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
+                    <FormField
+                      control={signUpForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter your full name" 
+                              {...field} 
+                              value={safeStr(field.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={signUpForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter your email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
                     <FormField
                       control={signUpForm.control}
                       name="username"
@@ -176,6 +228,24 @@ export default function AuthPage() {
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
                             <Input type="password" placeholder="Confirm your password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={signUpForm.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Position</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Your position (e.g. Manager, Nurse, etc.)" 
+                              {...field} 
+                              value={safeStr(field.value)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
